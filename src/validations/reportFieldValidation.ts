@@ -49,7 +49,8 @@ export const reportFieldSchema = yup.object().shape({
 function getOptionsSchema(field: ReportField): any {
   let result = yup
     .array()
-    .of(yup.mixed().oneOf(field.options.map((v) => v.value)));
+    .of(yup.mixed().oneOf(field.options.map((v) => v.value)))
+    .strict();
   if (field.isRequired) {
     result = result.min(1);
   }
@@ -60,22 +61,28 @@ export function getValidateSchema(field: ReportField): any {
   let schema = null;
   switch (field.type) {
     case Types.POSITIVE_NUMBER:
-      schema = yup.number().positive();
+      schema = yup.number().positive().strict();
       break;
     case Types.DATE_TIME:
       schema = yup.date();
       break;
     case Types.NEGATIVE_NUMBER:
-      schema = yup.number().negative();
+      schema = yup.number().negative().strict();
       break;
     case Types.TEXT:
-      schema = yup.string();
+      schema = yup.string().trim().strict();
       break;
     case Types.SELECT:
-      schema = yup.string();
+      schema = yup
+        .string()
+        .oneOf(field.options.map((v) => v.value))
+        .strict();
       break;
     case Types.RADIO_BUTTON:
-      schema = yup.string();
+      schema = yup
+        .string()
+        .oneOf(field.options.map((v) => v.value))
+        .strict();
       break;
     case Types.MULTI_SELECT:
       schema = getOptionsSchema(field);
@@ -109,14 +116,26 @@ export function getValidateSchema(field: ReportField): any {
   if (field.isRequired === true) {
     schema = schema.required();
   }
-  return { [field.propName]: schema };
+  return {
+    [field.propName]: schema,
+  };
 }
 
 /// {name}, {age}, {namSinh}
 /// {name: String}, {age: Number}, {nameSinh:  String}
 
 /// {name: String, age: Number, nameSinh:  String}
-function buildValidateSchema(fields: ReportField[]) {
+// export function buildValidateSchema(fields: ReportField[]) {
+//   return yup
+//     .object()
+//     .shape(
+//       fields
+//         .map((c) => getValidateSchema(c))
+//         .reduce((result, curr) => ({ ...result, ...curr }))
+//     );
+// }
+
+export function buildValidateSchema(fields: ReportField[]) {
   return yup
     .object()
     .shape(

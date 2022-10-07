@@ -28,7 +28,7 @@ export interface ReportField {
 export interface Option {
   id: string;
   name?: string;
-  child: OptionValue[],
+  child: OptionValue[];
 }
 export interface OptionValue {
   id: string;
@@ -37,7 +37,7 @@ export interface OptionValue {
 }
 export interface ReportType {
   name: string;
-  description: string;
+  value?: any;
 }
 
 export interface FilledReport {
